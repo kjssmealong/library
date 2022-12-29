@@ -12,6 +12,7 @@ const bcrypt = require('bcrypt')
 const saltRounds = 10;
 const jwt = require('jsonwebtoken')
 const serect = "X>0??Hn@tNIm9aM}Ahx#7b4";
+const Swal = require('sweetalert2');
 
 mongoose.connect("mongodb+srv://root:ACyq5EvTI708XTJl@cluster0.xzxqoxu.mongodb.net/library?retryWrites=true&w=majority", {
     useCreateIndex: true,
@@ -38,6 +39,7 @@ var storage = multer.diskStorage({
 })
 
 var session = require("express-session");
+const { application } = require("express");
 app.use(session({
     secret: "AbnUExJPTiAEmtlcFmOC3eyUjF7kN",
     cookie: {maxAge: 6600000000}
@@ -182,21 +184,28 @@ app.get("/register", (req, res) => {
 })
 
 app.post("/register", urlencodedParser, (req, res) => {
-    bcrypt.hash(req.body.password, saltRounds, (err, has) => {
-        let user = new User({
-            name: req.body.name,
-            email: req.body.email,
-            password: has
-        });
-        user.save( (err) => {
-            if (err) {
-                res.json({kq:0})
-            } else {
-                res.redirect("/login")
-            }
-        })
+
+    User.find({email:req.body.email}, (err, item) => { 
+        if (!err && item.length > 0) { 
+            res.json({kq:0, err: "The email already exists"});
+        } else {
+            bcrypt.hash(req.body.password, saltRounds, (err, has) => {
+                let user = new User({
+                    name: req.body.name,
+                    email: req.body.email,
+                    password: has
+                });
+                user.save( (err) => {
+                    if (err) {
+                        res.json({kq:0})
+                    } else {
+                        res.redirect("/login")
+                    }
+                })
+            })
+        }
     })
-    
+
 })
 
 app.get("/book/:id", (req, res) => {
@@ -210,4 +219,87 @@ app.get("/book/:id", (req, res) => {
     })
 })
 
+app.get("/book/delete/:id", (req, res) => {
+    checkToken(req, res);
+
+    Book.findByIdAndDelete( {_id:req.params.id},(err, item) => {
+        if (err) {
+            console.log(err);
+            return null;
+        } else {
+            res.redirect("http://localhost:3000/")
+        }
+    })
+})
+
+
+app.get("/book/edit/:id", (req, res) => {
+    checkToken(req, res);
+    Book.find( {_id:req.params.id},(err, item) => {
+        if (err) {
+            console.log(err);
+            return null;
+        } else {
+            Category.find( (err, items) => {
+                if(err) {
+                    res.render("bookEdit", {page:"bookEdit", book:item});
+                } else {
+                    res.render("bookEdit", {page:"bookEdit", book:item, cats:items});
+                }
+            })
+        }
+    })
+})
+
+app.post("/book/edit/:id", urlencodedParser,  async (req, res) => {
+    checkToken(req, res);
+    const book  = await Book.findById(req.params.id);
+    if (req.body.title) { 
+        book.title =  req.body.title;
+    }
+    if (req.body.title) { 
+        book.author =  req.body.author;
+    }
+    if (req.body.description) { 
+        book.description =  req.body.description;
+    }
+
+    if (req.body.publishDate) { 
+        book.publishDate =  req.body.publishDate;
+    }
+
+    
+    if (req.body.pageCount) { 
+        book.pageCount =  req.body.page_count;
+    }
+
+    if(req.file) {
+        upload(req, res, (err) => {
+            if(err instanceof multer.MulterError) {
+                console.log("A Multer error occurred when uploading." + err)
+            }else if(err) {
+                console.log("A Multer error occurred when uploading." + err)
+            } else {
+                book.mageUrl = req.file.originalname
+            }
+        });
+    }
+
+    book.save( (err) => {
+        if (err) {
+            res.json({kq: 0, "err": err})
+        } else {
+            if( req.body.selectCat) {
+                category.findOneAndUpdate({_id: req.body.selectCate}, {$push: {books_id: book._id}}, (err) => {
+                    if (err) {
+                        res.json({kq:0, "err": err})
+                    } 
+                })
+            }
+            console.log("book is ok");
+            res.redirect("/")
+            
+        }
+    })
+})
 
