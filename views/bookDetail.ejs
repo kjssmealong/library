@@ -1,0 +1,33 @@
+<%- include("header.ejs") %>
+<div class="container">
+    <h2 class="title-h2 text-center">Book</h2>
+    <form action="" method="post" enctype="multipart/form-data">
+        <div class="form-group">
+          <label for="exampleInputTitle">Tiêu đề</label>
+          <input type="text" name="title" value="<%- book[0].title %>" class="form-control" id="exampleInputTitle" placeholder="Tiêu đề" disabled>
+        </div>
+
+        <div class="form-group">
+            <label for="exampleInputAuthor">Tác giả</label>
+            <input type="text" name="author" value="<%- book[0].author %>" class="form-control" id="exampleInputAuthor" placeholder="Tác giả" disabled>
+        </div>
+        <div class="form-group">
+            <label for="exampleFormControlTextarea1">Mô tả</label>
+            <textarea class="form-control" name="description" id="exampleFormControlTextarea1" rows="3" disabled> <%- book[0].description %> </textarea>
+          </div>
+        <div class="form-group">
+            <label for="exampleInputDate">Ngày phát hành</label>
+            <input type="date" name="created_at" class="form-control" value="<%- book[0].publishDate %>" id="exampleInputDate" placeholder="Ngày phát hành" disabled>
+        </div>
+        <div class="form-group">
+            <label for="exampleInputPage">Số trang</label>
+            <input type="number" name="page_count" class="form-control" value="<%- book[0].pageCount %>" id="exampleInputPage" placeholder="Số trang" disabled>
+        </div>
+        <div class="form-group">
+            <label for="exampleInputImage">Image</label>
+            <input type="file" name="image" class="form-control" id="exampleInputImage" placeholder="Thể loại" disabled>
+        </div>
+      </form>
+</div>
+
+<%- include("footer.ejs") %>
