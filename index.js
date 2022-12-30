@@ -106,14 +106,8 @@ app.post("/page/book", urlencodedParser, (req, res) => {
                 if (err) {
                     res.json({kq: 0, "err": err})
                 } else {
-                    category.findOneAndUpdate({_id: req.body.selectCate}, {$push: {books_id: book._id}}, (err) => {
-                        if (err) {
-                            res.json({kq:0, "err": err})
-                        } else {
-                            console.log("book is ok");
-                            res.redirect("/")
-                        }
-                    })
+                    console.log("book is ok");
+                    res.redirect("/")
                 }
             })
         }
